@@ -1,0 +1,29 @@
+package com.viswa_code.departmentservice.config;
+
+import com.viswa_code.departmentservice.client.EmployeeClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.support.WebClientAdapter;
+import org.springframework.web.service.invoker.HttpServiceProxyFactory;
+
+@Configuration
+public class webClientConfig {
+
+    @Autowired
+    private LoadBalancedExchangeFilterFunction filerFunction;
+    @Bean
+    public WebClient employeeWebCLient() {
+        return WebClient.builder().baseUrl("http://employee-service").filter(filerFunction).build();
+    }
+	@Bean
+	public EmployeeClient employeeClient() {
+		WebClientAdapter adapter = WebClientAdapter.create(employeeWebCLient());
+		HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
+
+		return factory.createClient(EmployeeClient.class);
+	}
+
+}
